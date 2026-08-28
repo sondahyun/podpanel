@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">PodPanel</string>
+    <string name="title_my_pods">내 에어팟</string>
+
+    <string name="left">왼쪽</string>
+    <string name="right">오른쪽</string>
+    <string name="case_">케이스</string>
+
+    <string name="short_left">L</string>
+    <string name="short_right">R</string>
+    <string name="short_case">C</string>
+
+    <string name="searching">에어팟을 찾고 있습니다</string>
+    <string name="searching_hint">케이스를 열거나 에어팟을 착용하면 신호가 잡힙니다</string>
+    <string name="stale_title">신호가 끊겼습니다</string>
+    <string name="stale_hint">마지막으로 받은 값을 보여주고 있습니다</string>
+
+    <string name="bluetooth_off">블루투스가 꺼져 있습니다</string>
+    <string name="bluetooth_off_hint">설정에서 블루투스를 켜면 바로 다시 찾습니다</string>
+    <string name="no_bluetooth">이 기기는 블루투스 LE를 지원하지 않습니다</string>
+    <string name="no_bluetooth_hint">에어팟이 보내는 신호를 받을 방법이 없습니다</string>
+    <string name="permission_needed">권한이 필요합니다</string>
+    <string name="permission_needed_hint">위치는 쓰지 않고 근처 기기 검색에만 씁니다</string>
+    <string name="permission_grant">권한 허용</string>
+
+    <string name="section_noise_control">노이즈 컨트롤</string>
+    <string name="noise_off">끔</string>
+    <string name="noise_cancellation">노이즈 캔슬링</string>
+    <string name="noise_transparency">주변음</string>
+    <string name="noise_adaptive">적응형</string>
+    <string name="noise_needs_update">이 안드로이드 버전에서는 에어팟과 양방향 연결이 열리지 않습니다. Android 17(One UI 9)로 업데이트하면 열립니다.</string>
+    <string name="noise_unsupported">이 기기에서는 에어팟과 양방향 연결이 열리지 않습니다. 안드로이드 블루투스 스택의 제약이라 앱에서 해결할 수 없습니다.</string>
+
+    <string name="wear_both">둘 다 착용 중</string>
+    <string name="wear_left_only">왼쪽만 착용 중</string>
+    <string name="wear_right_only">오른쪽만 착용 중</string>
+    <string name="wear_one">한쪽 착용 중</string>
+    <string name="wear_none">착용하지 않음</string>
+    <string name="link_connected">연결됨</string>
+    <string name="signal_hint_now_short">방금 수신</string>
+    <string name="signal_hint_short">%1$d초 전 수신</string>
+
+    <string name="noise_connecting">에어팟과 연결하는 중입니다.</string>
+    <string name="noise_needs_permission">블루투스 연결 권한이 필요합니다.</string>
+
+    <string name="section_behaviour">동작</string>
+    <string name="behaviour_ear_detection">자동 귀 감지</string>
+    <string name="behaviour_ear_detection_hint">빼면 멈추고 다시 끼면 이어서 재생합니다</string>
+    <string name="behaviour_conversation">대화 감지</string>
+    <string name="behaviour_conversation_hint">말을 시작하면 소리를 낮춥니다</string>
+    <string name="behaviour_one_bud">한쪽만 착용 시 노이즈 컨트롤</string>
+    <string name="behaviour_one_bud_hint">한쪽을 빼도 모드를 유지합니다</string>
+    <string name="behaviour_volume_swipe">볼륨 스와이프</string>
+
+    <string name="tile_unavailable">사용할 수 없음</string>
+    <string name="tile_unknown">알 수 없음</string>
+
+    <string name="section_display">표시</string>
+    <string name="notification_label">상단 알림에 계속 표시</string>
+    <string name="notification_hint">앱을 닫아도 배터리를 계속 갱신합니다</string>
+
+    <string name="section_raw">원시 패킷</string>
+    <string name="raw_last_packet">마지막 패킷</string>
+    <string name="debug_show">펼치기</string>
+    <string name="debug_hide">접기</string>
+    <string name="debug_empty">아직 받은 패킷이 없습니다</string>
+    <string name="debug_caption">바이트 해석을 실기로 검증할 때 씁니다. 눈으로 확인한 값과 함께 보내주시면 그대로 테스트가 됩니다.</string>
+    <string name="debug_copy">픽스처로 복사</string>
+    <string name="debug_copied">복사했습니다</string>
+
+    <string name="widget_description">에어팟 좌·우·케이스 배터리를 홈 화면에 표시합니다</string>
+    <string name="widget_preview_values">82 · 79 · 41</string>
+
+    <string name="section_about">정보</string>
+    <string name="licenses">오픈소스 라이선스</string>
+    <string name="probe">연결 진단</string>
+    <string name="probe_title">연결 진단</string>
+    <string name="probe_intro">이 폰에서 에어팟과 양방향 연결이 열리는지 확인합니다. 안드로이드 버전만으로는 알 수 없습니다 — 일찍 수정을 받은 기기가 있고, 두 관문 중 하나는 이 빌드에 달려 있기 때문입니다. 에어팟을 착용하거나 케이스를 열어 연결한 뒤 실행하세요.</string>
+    <string name="probe_run">검사 실행</string>
+    <string name="probe_running">검사 중…</string>
+    <string name="probe_copy">결과 복사</string>
+    <string name="probe_verdict_open">모든 관문을 통과했습니다. 이 폰에서 노이즈 컨트롤을 쓸 수 있습니다.</string>
+    <string name="probe_verdict_blocked">위에서 처음 실패한 단계가 막고 있는 지점입니다. 결과를 복사해 보내주시면 어느 관문인지 판정됩니다.</string>
+    <string name="licenses_title">라이선스</string>
+    <string name="licenses_bundled">앱에 포함된 것</string>
+    <string name="licenses_referenced">참고만 한 것</string>
+    <string name="licenses_referenced_footer">프로토콜의 바이트 배치는 사실이라 저작권이 붙지 않습니다. 이 앱에 해당 프로젝트의 소스는 들어 있지 않습니다.</string>
+    <string name="licenses_trademark">“AirPods”와 “Apple”은 Apple Inc.의 상표입니다. 이 앱은 Apple과 무관하며, 무엇과 호환되는지 말하기 위해서만 이름을 씁니다.</string>
+
+    <string name="channel_name">배터리 표시</string>
+    <string name="channel_description">에어팟 배터리를 알림에 계속 표시합니다</string>
+
+    <string name="resolution_note" formatted="false">배터리는 10% 단위로만 전송됩니다. 앱의 한계가 아니라 에어팟이 방송하는 값의 정밀도입니다.</string>
+</resources>

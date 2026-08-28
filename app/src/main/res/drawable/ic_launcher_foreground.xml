@@ -1,0 +1,23 @@
+<!--
+    Generated from design/graphics/PodGlyphPath so the launcher icon, the
+    notification icon and the silhouettes inside the battery rings are one shape.
+    Regenerate rather than editing by hand.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M37.68,34.1C43.99,35.22 48.3,40.61 47.33,46.15C46.35,51.69 40.45,55.29 34.14,54.17C27.84,53.06 23.52,47.67 24.5,42.13C25.48,36.58 31.38,32.99 37.68,34.1Z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M31.57,66.5L33.51,55.48A5.19,5.19 0 0 1 43.74,57.29L41.8,68.3A5.19,5.19 0 0 1 31.57,66.5Z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M70.32,34.1C76.62,32.99 82.52,36.58 83.5,42.13C84.48,47.67 80.16,53.06 73.86,54.17C67.55,55.29 61.65,51.69 60.67,46.15C59.7,40.61 64.01,35.22 70.32,34.1Z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M66.2,68.3L64.26,57.29A5.19,5.19 0 0 1 74.49,55.48L76.43,66.5A5.19,5.19 0 0 1 66.2,68.3Z" />
+</vector>

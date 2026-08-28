@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    English is the default so that an unmatched locale falls back to something readable.
+    Korean lives in values-ko/, which is the locale the app is written for.
+-->
+<resources>
+    <string name="app_name">PodPanel</string>
+    <string name="title_my_pods">My AirPods</string>
+
+    <string name="left">Left</string>
+    <string name="right">Right</string>
+    <string name="case_">Case</string>
+
+    <string name="short_left">L</string>
+    <string name="short_right">R</string>
+    <string name="short_case">C</string>
+
+    <string name="searching">Looking for your AirPods</string>
+    <string name="searching_hint">Open the case or put them in to pick up a signal</string>
+    <string name="stale_title">Signal lost</string>
+    <string name="stale_hint">Showing the last reading received</string>
+
+    <string name="bluetooth_off">Bluetooth is off</string>
+    <string name="bluetooth_off_hint">Turn it on and the search resumes straight away</string>
+    <string name="no_bluetooth">This device has no Bluetooth LE</string>
+    <string name="no_bluetooth_hint">There is no way to receive what AirPods broadcast</string>
+    <string name="permission_needed">Permission needed</string>
+    <string name="permission_needed_hint">Nearby devices only. Location is never used</string>
+    <string name="permission_grant">Allow</string>
+
+    <string name="section_noise_control">Noise Control</string>
+    <string name="noise_off">Off</string>
+    <string name="noise_cancellation">Noise Cancellation</string>
+    <string name="noise_transparency">Transparency</string>
+    <string name="noise_adaptive">Adaptive</string>
+    <string name="noise_needs_update">This Android version cannot open a two-way link to AirPods. Updating to Android 17 (One UI 9) opens it.</string>
+    <string name="noise_unsupported">A two-way link to AirPods cannot be opened on this device. That is a limit of the Android Bluetooth stack, not something the app can work around.</string>
+
+    <string name="wear_both">Both in</string>
+    <string name="wear_left_only">Left in</string>
+    <string name="wear_right_only">Right in</string>
+    <string name="wear_one">One in</string>
+    <string name="wear_none">Not being worn</string>
+    <string name="link_connected">Connected</string>
+    <string name="signal_hint_now_short">Just now</string>
+    <string name="signal_hint_short">%1$ds ago</string>
+    <string name="noise_connecting">Connecting to the AirPods.</string>
+    <string name="noise_needs_permission">Bluetooth connect permission is needed.</string>
+    <string name="section_behaviour">Behaviour</string>
+    <string name="behaviour_ear_detection">Automatic ear detection</string>
+    <string name="behaviour_ear_detection_hint">Pauses when you take one out, resumes when you put it back</string>
+    <string name="behaviour_conversation">Conversation awareness</string>
+    <string name="behaviour_conversation_hint">Lowers the volume when you start speaking</string>
+    <string name="behaviour_one_bud">Noise control with one bud</string>
+    <string name="behaviour_one_bud_hint">Keeps the mode when you take one out</string>
+    <string name="behaviour_volume_swipe">Volume swipe</string>
+
+    <string name="tile_unavailable">Not available</string>
+    <string name="tile_unknown">Unknown</string>
+
+    <string name="section_display">Display</string>
+    <string name="notification_label">Keep in the notification shade</string>
+    <string name="notification_hint">Keeps updating after you close the app</string>
+
+    <string name="section_raw">Raw packet</string>
+    <string name="raw_last_packet">Last packet</string>
+    <string name="debug_show">Show</string>
+    <string name="debug_hide">Hide</string>
+    <string name="debug_empty">No packet received yet</string>
+    <string name="debug_caption">For checking the byte layout against real hardware. Send this along with what you could see at the time and it becomes a test as-is.</string>
+    <string name="debug_copy">Copy as fixture</string>
+    <string name="debug_copied">Copied</string>
+
+    <string name="section_about">About</string>
+    <string name="licenses">Open-source licences</string>
+    <string name="probe">Connection check</string>
+    <string name="probe_title">Connection check</string>
+    <string name="probe_intro">Checks, on this phone, whether a two-way link to the AirPods can be opened. The answer cannot be read off the Android version — some devices carry the fix early, and one of the two gates depends on this exact build. Put the AirPods in or open the case first.</string>
+    <string name="probe_run">Run the check</string>
+    <string name="probe_running">Checking…</string>
+    <string name="probe_copy">Copy the result</string>
+    <string name="probe_verdict_open">Every gate passed. Noise control can work on this phone.</string>
+    <string name="probe_verdict_blocked">The first failed step above is what blocks it. Copying the result and sending it along is enough to tell which gate it was.</string>
+    <string name="licenses_title">Licences</string>
+    <string name="licenses_bundled">Shipped in this app</string>
+    <string name="licenses_referenced">Referenced, not included</string>
+    <string name="licenses_referenced_footer">Protocol byte layouts are facts and carry no copyright. No source from these projects is in this app.</string>
+    <string name="licenses_trademark">“AirPods” and “Apple” are trademarks of Apple Inc. This app is not affiliated with Apple and names them only to say what it works with.</string>
+
+    <string name="widget_description">Shows left, right and case battery on your home screen</string>
+    <string name="widget_preview_values">82 · 79 · 41</string>
+
+    <string name="channel_name">Battery</string>
+    <string name="channel_description">Keeps AirPods battery in the notification shade</string>
+
+    <string name="resolution_note" formatted="false">Battery is broadcast in steps of 10% only. That is the precision of what AirPods send, not a limit of this app.</string>
+</resources>

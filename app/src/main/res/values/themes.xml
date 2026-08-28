@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+        Only the launch window uses this; everything after the first frame is Compose.
+        DayNight keeps the pre-Compose flash on the right side of the theme — the platform
+        has no DayNight.NoActionBar variant, so the bar is switched off by hand.
+    -->
+    <style name="Theme.PodPanel" parent="android:Theme.DeviceDefault.DayNight">
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+    </style>
+</resources>
