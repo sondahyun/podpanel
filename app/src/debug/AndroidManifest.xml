@@ -1,42 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application>
-        <!-- Debug-only: the design system's own proving ground, never shipped. -->
         <activity
             android:name=".gallery.DesignGalleryActivity"
-            android:exported="true"
-            android:label="PodPanel Design">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+            android:exported="false" />
         <activity
             android:name=".gallery.StateGalleryActivity"
-            android:exported="true"
-            android:label="PodPanel States">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+            android:exported="false" />
         <activity
             android:name=".gallery.WidgetPreviewActivity"
-            android:exported="true"
-            android:label="PodPanel Widget">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+            android:exported="false" />
         <activity
             android:name=".gallery.CaptureActivity"
-            android:exported="true"
-            android:label="PodPanel Capture">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+            android:exported="false" />
     </application>
 </manifest>
