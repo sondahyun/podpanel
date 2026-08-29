@@ -1,6 +1,8 @@
 package io.github.sondahyun.podpanel.widget
 
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.res.Configuration
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
@@ -79,11 +81,12 @@ class BatteryWidget(
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val pods = stateOverride ?: Pods.repository(context).state.value
-        provideContent { Body(pods) }
+        val phone = phoneBattery(context)
+        provideContent { Body(pods, phone) }
     }
 
     @Composable
-    private fun Body(pods: PodsState) {
+    private fun Body(pods: PodsState, phone: PodBattery) {
         val context = LocalContext.current
         // The bitmaps are baked at composition time, so the palette has to be resolved here
         // rather than handed over as a day/night provider the way Glance's own colours are.
@@ -104,7 +107,7 @@ class BatteryWidget(
                 Header(pods, layout, colors)
                 Spacer(GlanceModifier.height(layout.headerGap))
             }
-            Rings(context, colors, pods, layout)
+            Rings(context, colors, pods, phone, layout)
             if (layout.showModes) {
                 Spacer(GlanceModifier.height(MODE_GAP))
                 Modes(pods, layout)
@@ -146,6 +149,7 @@ class BatteryWidget(
         context: Context,
         colors: PodColors,
         pods: PodsState,
+        phone: PodBattery,
         layout: WidgetLayout,
     ) {
         // Weighted spacers rather than a fixed gap: the row then fills whatever width the
@@ -155,6 +159,8 @@ class BatteryWidget(
             modifier = GlanceModifier.fillMaxWidth(),
             verticalAlignment = Alignment.Vertical.CenterVertically,
         ) {
+            Spacer(GlanceModifier.defaultWeight())
+            RingCell(context, colors, layout, PodGlyph.Phone, R.string.phone, phone)
             Spacer(GlanceModifier.defaultWeight())
             RingCell(context, colors, layout, PodGlyph.LeftBud, R.string.left, pods.left)
             Spacer(GlanceModifier.defaultWeight())
@@ -303,6 +309,18 @@ class BatteryWidget(
         /** The host scales the bitmap; below this the scaling shows. */
         const val RENDER_SCALE = 2.5f
     }
+
+    private fun phoneBattery(context: Context): PodBattery {
+        val battery = context.registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
+        val level = battery?.getIntExtra("level", -1) ?: -1
+        val scale = battery?.getIntExtra("scale", -1) ?: -1
+        val status = battery?.getIntExtra("status", -1) ?: -1
+        return PodBattery(
+            percent = if (level >= 0 && scale > 0) level * 100 / scale else null,
+            charging = status == android.os.BatteryManager.BATTERY_STATUS_CHARGING ||
+                status == android.os.BatteryManager.BATTERY_STATUS_FULL,
+        )
+    }
 }
 
 // ── 크기 적응 ────────────────────────────────────────────────────────────────
@@ -352,8 +370,10 @@ internal fun layoutFor(size: DpSize, controllable: Boolean): WidgetLayout {
 
     val byHeight = size.height - chromeHeight(padding, headerGap, showHeader, showModes, labels)
 
-    // Each cell gets a third of the row; beside-labels take part of that from the ring.
-    val perCell = size.width / 3 - padding
+    // Each cell gets a quarter of the row; beside-labels take part of that from the ring.
+    // Reserve the largest horizontal inset so a taller widget never makes rings shrink just
+    // because its vertical padding grew.
+    val perCell = size.width / 4 - 16.dp
     val byWidth = if (labels == LabelPlacement.Beside) perCell - BESIDE_LABEL_WIDTH else perCell
 
     // Capping the ring against the widget's own height keeps the proportion iOS uses — the

@@ -10,6 +10,7 @@
     <string name="left">Left</string>
     <string name="right">Right</string>
     <string name="case_">Case</string>
+    <string name="phone">Phone</string>
 
     <string name="short_left">L</string>
     <string name="short_right">R</string>

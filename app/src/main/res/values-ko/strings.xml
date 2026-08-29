@@ -6,6 +6,7 @@
     <string name="left">왼쪽</string>
     <string name="right">오른쪽</string>
     <string name="case_">케이스</string>
+    <string name="phone">휴대폰</string>
 
     <string name="short_left">L</string>
     <string name="short_right">R</string>

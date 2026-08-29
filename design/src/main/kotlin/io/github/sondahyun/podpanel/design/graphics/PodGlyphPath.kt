@@ -5,7 +5,7 @@ import android.graphics.Path
 import android.graphics.RectF
 
 /** Which component a ring is showing. Decides the silhouette drawn inside it. */
-enum class PodGlyph { LeftBud, RightBud, Case }
+enum class PodGlyph { Phone, LeftBud, RightBud, Case }
 
 /**
  * The silhouettes, built once as plain [Path]s.
@@ -19,9 +19,36 @@ object PodGlyphPath {
 
     /** [size] is the glyph's nominal box; the shapes are drawn centred on [cx], [cy]. */
     fun glyph(glyph: PodGlyph, cx: Float, cy: Float, size: Float): Path = when (glyph) {
+        PodGlyph.Phone -> phone(cx, cy, size)
         PodGlyph.LeftBud -> bud(cx, cy, size, dir = 1f)
         PodGlyph.RightBud -> bud(cx, cy, size, dir = -1f)
         PodGlyph.Case -> case(cx, cy, size)
+    }
+
+    private fun phone(cx: Float, cy: Float, size: Float): Path = Path().apply {
+        val width = size * 0.46f
+        val height = size * 0.76f
+        val corner = size * 0.09f
+        addRoundRect(
+            RectF(cx - width / 2f, cy - height / 2f, cx + width / 2f, cy + height / 2f),
+            corner,
+            corner,
+            Path.Direction.CW,
+        )
+        val screen = Path().apply {
+            addRoundRect(
+                RectF(
+                    cx - width * 0.34f,
+                    cy - height * 0.34f,
+                    cx + width * 0.34f,
+                    cy + height * 0.34f,
+                ),
+                corner * 0.45f,
+                corner * 0.45f,
+                Path.Direction.CW,
+            )
+        }
+        op(screen, Path.Op.DIFFERENCE)
     }
 
     /**
