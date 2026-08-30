@@ -2,7 +2,6 @@ package io.github.sondahyun.podpanel.bluetooth
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothProfile
@@ -65,7 +64,7 @@ object ChannelBProbe {
 
         val order = listOf(
             "블루투스 연결 권한",
-            "본딩된 애플 오디오 기기",
+            "연결된 오디오 기기",
             "기기가 지금 연결돼 있는가",
             "히든 소켓 생성자 도달",
             "L2CAP 0x1001 연결",
@@ -82,22 +81,23 @@ object ChannelBProbe {
             return@withContext report(context, steps)
         }
 
-        // 2 — a bonded Apple audio device
-        val adapter: BluetoothAdapter? = context.getSystemService(BluetoothManager::class.java)?.adapter
-        val pods = adapter?.bondedDevices.orEmpty().firstOrNull { ApplePods.matches(it) }
+        // 2 — use the audio device Android reports as connected.
+        val pods = context.getSystemService(BluetoothManager::class.java)
+            ?.getConnectedDevices(BluetoothProfile.A2DP)
+            ?.firstOrNull()
         steps += Step(order[1], if (pods != null) Outcome.Pass else Outcome.Fail,
-            pods?.let { "${it.name} · ${it.address}" } ?: "애플 OUI를 가진 본딩 기기를 찾지 못했습니다")
+            pods?.let { "${it.name} · ${it.address}" } ?: "연결된 오디오 기기를 찾지 못했습니다")
         if (pods == null) {
             skipRest(2, order)
             return@withContext report(context, steps)
         }
 
-        // 3 — connected right now. A bonded but idle device will refuse the socket.
+        // 3 — the selected device is already connected.
         val connected = context.getSystemService(BluetoothManager::class.java)
             ?.getConnectedDevices(BluetoothProfile.A2DP)
             ?.any { it.address == pods.address } == true
         steps += Step(order[2], if (connected) Outcome.Pass else Outcome.Fail,
-            if (connected) "A2DP 연결됨" else "에어팟을 착용하거나 케이스를 열어 연결한 뒤 다시 시도하세요")
+            if (connected) "오디오 연결됨" else "오디오 기기를 연결한 뒤 다시 시도하세요")
         if (!connected) {
             skipRest(3, order)
             return@withContext report(context, steps)

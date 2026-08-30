@@ -9,7 +9,6 @@
         android:name="android.permission.BLUETOOTH_SCAN"
         android:usesPermissionFlags="neverForLocation" />
 
-    <!-- Channel B needs a real connection to the bonded AirPods, not just a scan. -->
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
 
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />

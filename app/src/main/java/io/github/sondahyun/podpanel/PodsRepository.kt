@@ -3,6 +3,7 @@ package io.github.sondahyun.podpanel
 import android.annotation.SuppressLint
 import android.Manifest
 import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothA2dp
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothProfile
@@ -13,7 +14,6 @@ import android.content.IntentFilter
 import android.content.pm.PackageManager
 import androidx.core.content.ContextCompat
 import io.github.sondahyun.podpanel.bluetooth.AacpSession
-import io.github.sondahyun.podpanel.bluetooth.ApplePods
 import io.github.sondahyun.podpanel.protocol.PodsState
 import io.github.sondahyun.podpanel.protocol.applyAacp
 import io.github.sondahyun.podpanel.protocol.mergeAdvertisement
@@ -87,9 +87,9 @@ class PodsRepository(
      */
     fun start() {
         registerConnectionWatcher()
-        val bonded = bondedPods()
-        session.setDevice(bonded)
-        if (currentlyConnected(bonded)) session.onConnected()
+        val connected = connectedAudioDevice()
+        session.setDevice(connected)
+        if (connected != null) session.onConnected()
         scanner.start()
     }
 
@@ -146,14 +146,11 @@ class PodsRepository(
 
     // ── 기기가 붙었는지 ──────────────────────────────────────────────────────
 
-    private fun adapter(): BluetoothAdapter? =
-        context.getSystemService(BluetoothManager::class.java)?.adapter
-
     @SuppressLint("MissingPermission")
-    private fun bondedPods(): BluetoothDevice? = runCatching {
-        adapter()?.bondedDevices?.firstOrNull { device ->
-            ApplePods.matches(device)
-        }
+    private fun connectedAudioDevice(): BluetoothDevice? = runCatching {
+        context.getSystemService(BluetoothManager::class.java)
+            ?.getConnectedDevices(BluetoothProfile.A2DP)
+            ?.firstOrNull()
     }.getOrNull()
 
     @SuppressLint("MissingPermission")
@@ -187,9 +184,9 @@ class PodsRepository(
                             session.onBluetoothOff()
                         }
                         BluetoothAdapter.STATE_ON -> {
-                            val bonded = bondedPods()
-                            session.setDevice(bonded)
-                            if (currentlyConnected(bonded)) session.onConnected()
+                            val connected = connectedAudioDevice()
+                            session.setDevice(connected)
+                            if (connected != null) session.onConnected()
                             scanner.start()
                         }
                     }
@@ -199,22 +196,26 @@ class PodsRepository(
                     BluetoothDevice.EXTRA_DEVICE,
                     BluetoothDevice::class.java,
                 ) ?: return
-                if (!ApplePods.matches(device)) return
-
                 when (intent.action) {
-                    BluetoothDevice.ACTION_ACL_CONNECTED -> {
+                    BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED -> {
+                        val state = intent.getIntExtra(
+                            BluetoothProfile.EXTRA_STATE,
+                            BluetoothProfile.STATE_DISCONNECTED,
+                        )
+                        if (state != BluetoothProfile.STATE_CONNECTED) {
+                            session.onDisconnected()
+                            return
+                        }
                         session.setDevice(device)
                         session.onConnected()
                     }
-                    BluetoothDevice.ACTION_ACL_DISCONNECTED -> session.onDisconnected()
                 }
             }
         }
         context.registerReceiver(
             receiver,
             IntentFilter().apply {
-                addAction(BluetoothDevice.ACTION_ACL_CONNECTED)
-                addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED)
+                addAction(BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED)
                 addAction(BluetoothAdapter.ACTION_STATE_CHANGED)
             },
         )
