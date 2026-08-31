@@ -20,6 +20,10 @@ object Pods {
     private const val PREFS = "podpanel"
     private const val KEY_NOTIFICATION = "notification_enabled"
     private const val KEY_LID_POPUP = "lid_popup_enabled"
+    private const val KEY_DEVICE_ADDRESS = "selected_device_address"
+    private const val KEY_DEVICE_NAME = "selected_device_name"
+
+    data class SelectedDevice(val name: String, val address: String)
 
     @Volatile
     private var instance: PodsRepository? = null
@@ -56,6 +60,24 @@ object Pods {
 
     fun setLidPopupEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_LID_POPUP, enabled).apply()
+    }
+
+    fun selectedDevice(context: Context): SelectedDevice? {
+        val prefs = prefs(context)
+        val address = prefs.getString(KEY_DEVICE_ADDRESS, null) ?: return null
+        return SelectedDevice(prefs.getString(KEY_DEVICE_NAME, null) ?: address, address)
+    }
+
+    fun setSelectedDevice(context: Context, device: SelectedDevice?) {
+        prefs(context).edit().apply {
+            if (device == null) {
+                remove(KEY_DEVICE_ADDRESS)
+                remove(KEY_DEVICE_NAME)
+            } else {
+                putString(KEY_DEVICE_ADDRESS, device.address)
+                putString(KEY_DEVICE_NAME, device.name)
+            }
+        }.apply()
     }
 
     private fun prefs(context: Context) =

@@ -93,6 +93,13 @@
     <string name="lid_popup_label">Case-open popup</string>
     <string name="lid_popup_hint">Show a battery card when a lid-open signal is detected</string>
     <string name="lid_popup_opened">Case opened</string>
+    <string name="device_picker_title">AirPods device</string>
+    <string name="device_picker_header">Choose the paired device to connect to</string>
+    <string name="device_picker_footer">When more than one audio device is connected, PodPanel only uses the device chosen here.</string>
+    <string name="device_auto">Automatic selection</string>
+    <string name="device_auto_hint">Only connect when one audio device is connected</string>
+    <string name="device_selected">Selected</string>
+    <string name="device_none">No paired Bluetooth devices were found.</string>
 
     <string name="channel_name">Battery</string>
     <string name="channel_description">Keeps AirPods battery in the notification shade</string>

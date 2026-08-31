@@ -21,6 +21,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.sondahyun.podpanel.design.PodTheme
 import io.github.sondahyun.podpanel.ui.LicensesScreen
+import io.github.sondahyun.podpanel.ui.DevicePickerScreen
 import io.github.sondahyun.podpanel.ui.MainScreen
 import io.github.sondahyun.podpanel.ui.PodsActions
 import io.github.sondahyun.podpanel.ui.ProbeScreen
@@ -29,7 +30,7 @@ import io.github.sondahyun.podpanel.ui.podsUiState
 import kotlinx.coroutines.delay
 
 /** Two extra screens is not worth a navigation library. */
-private enum class Screen { Main, Licences, Probe }
+private enum class Screen { Main, Licences, Probe, DevicePicker }
 
 class MainActivity : ComponentActivity() {
 
@@ -58,12 +59,23 @@ class MainActivity : ComponentActivity() {
                 var screen by remember { mutableStateOf(Screen.Main) }
                 var notification by remember { mutableStateOf(notificationPreference()) }
                 var lidPopup by remember { mutableStateOf(Pods.lidPopupEnabled(this@MainActivity)) }
+                var selectedDevice by remember { mutableStateOf(repository.selectedAudioDevice()) }
 
                 if (screen != Screen.Main) {
                     BackHandler { screen = Screen.Main }
                     when (screen) {
                         Screen.Licences -> LicensesScreen(onBack = { screen = Screen.Main })
                         Screen.Probe -> ProbeScreen(onBack = { screen = Screen.Main })
+                        Screen.DevicePicker -> DevicePickerScreen(
+                            devices = repository.pairedAudioDevices(),
+                            selected = selectedDevice,
+                            onBack = { screen = Screen.Main },
+                            onSelect = { device ->
+                                repository.selectAudioDevice(device)
+                                selectedDevice = device
+                                screen = Screen.Main
+                            },
+                        )
                         Screen.Main -> Unit
                     }
                     return@PodTheme
@@ -76,6 +88,7 @@ class MainActivity : ComponentActivity() {
                     controls = controlAvailability(session),
                     notificationEnabled = notification,
                     lidPopupEnabled = lidPopup,
+                    selectedDeviceName = selectedDevice?.name,
                     actions = PodsActions(
                         onListeningMode = repository::setListeningMode,
                         onToggle = repository::setToggle,
@@ -100,6 +113,7 @@ class MainActivity : ComponentActivity() {
                             }
                             PodsService.syncTo(this)
                         },
+                        onOpenDevicePicker = { screen = Screen.DevicePicker },
                         onOpenLicenses = { screen = Screen.Licences },
                         onOpenProbe = { screen = Screen.Probe },
                     ),

@@ -58,6 +58,7 @@ data class PodsActions(
     val onGrantPermission: () -> Unit = {},
     val onNotificationChange: (Boolean) -> Unit = {},
     val onLidPopupChange: (Boolean) -> Unit = {},
+    val onOpenDevicePicker: () -> Unit = {},
     val onOpenLicenses: () -> Unit = {},
     val onOpenProbe: () -> Unit = {},
 )
@@ -68,6 +69,7 @@ fun MainScreen(
     controls: ControlAvailability,
     notificationEnabled: Boolean,
     lidPopupEnabled: Boolean = false,
+    selectedDeviceName: String? = null,
     actions: PodsActions,
 ) {
     LargeTitleScaffold(title = stringResource(R.string.title_my_pods)) {
@@ -83,6 +85,8 @@ fun MainScreen(
                 lidPopupEnabled,
                 actions.onNotificationChange,
                 actions.onLidPopupChange,
+                selectedDeviceName,
+                actions.onOpenDevicePicker,
             )
         }
         item { Gap() }
@@ -312,8 +316,17 @@ private fun DisplaySection(
     lidPopupEnabled: Boolean,
     onNotificationChange: (Boolean) -> Unit,
     onLidPopupChange: (Boolean) -> Unit,
+    selectedDeviceName: String?,
+    onOpenDevicePicker: () -> Unit,
 ) {
     InsetGroup(header = stringResource(R.string.section_display)) {
+        row {
+            PodRow(
+                title = stringResource(R.string.device_picker_title),
+                subtitle = selectedDeviceName ?: stringResource(R.string.device_auto_hint),
+                onClick = onOpenDevicePicker,
+            ) { PodChevron() }
+        }
         row {
             PodRow(
                 title = stringResource(R.string.notification_label),

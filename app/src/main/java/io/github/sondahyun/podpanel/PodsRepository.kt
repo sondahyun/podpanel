@@ -1,7 +1,6 @@
 package io.github.sondahyun.podpanel
 
 import android.annotation.SuppressLint
-import android.Manifest
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothA2dp
 import android.bluetooth.BluetoothDevice
@@ -11,8 +10,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.content.pm.PackageManager
-import androidx.core.content.ContextCompat
 import io.github.sondahyun.podpanel.bluetooth.AacpSession
 import io.github.sondahyun.podpanel.protocol.PodsState
 import io.github.sondahyun.podpanel.protocol.applyAacp
@@ -51,6 +48,7 @@ class PodsRepository(
     private val context: Context,
     private val scope: CoroutineScope,
 ) {
+    data class AudioDevice(val name: String, val address: String)
     private val scanner = PodsScanner(context)
     private val session = AacpSession(context, scope)
 
@@ -119,6 +117,23 @@ class PodsRepository(
 
     fun retryLink() = session.retry()
 
+    @SuppressLint("MissingPermission")
+    fun pairedAudioDevices(): List<AudioDevice> = runCatching {
+        adapter()?.bondedDevices.orEmpty()
+            .map { AudioDevice(it.name ?: it.address, it.address) }
+            .sortedBy { it.name.lowercase() }
+    }.getOrDefault(emptyList())
+
+    fun selectedAudioDevice(): AudioDevice? =
+        Pods.selectedDevice(context)?.let { AudioDevice(it.name, it.address) }
+
+    fun selectAudioDevice(device: AudioDevice?) {
+        Pods.setSelectedDevice(context, device?.let { Pods.SelectedDevice(it.name, it.address) })
+        val connected = connectedAudioDevice()
+        session.setDevice(connected)
+        if (connected != null) session.onConnected() else session.onDisconnected()
+    }
+
     /** Keeps BLE scanning alive while the lid popup is enabled. */
     fun setLidEventsEnabled(enabled: Boolean) {
         lidEventsEnabled = enabled
@@ -147,7 +162,9 @@ class PodsRepository(
     // can hold them still. What is left here is plumbing.
 
     private fun onAdvertisement(status: PodsStatus) {
-        if (lidEventsEnabled && lidOpenDetector.observe(status)) _lidOpened.tryEmit(status)
+        if (lidEventsEnabled && connectedAudioDevice() != null && lidOpenDetector.observe(status)) {
+            _lidOpened.tryEmit(status)
+        }
         primaryIsLeft = !status.flipped
         _state.value = _state.value.mergeAdvertisement(status)
     }
@@ -162,26 +179,21 @@ class PodsRepository(
 
     // ── 기기가 붙었는지 ──────────────────────────────────────────────────────
 
-    @SuppressLint("MissingPermission")
-    private fun connectedAudioDevice(): BluetoothDevice? = runCatching {
-        context.getSystemService(BluetoothManager::class.java)
-            ?.getConnectedDevices(BluetoothProfile.A2DP)
-            ?.firstOrNull()
-    }.getOrNull()
+    private fun adapter(): BluetoothAdapter? =
+        context.getSystemService(BluetoothManager::class.java)?.adapter
 
     @SuppressLint("MissingPermission")
-    private fun currentlyConnected(device: BluetoothDevice?): Boolean {
-        if (device == null || ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.BLUETOOTH_CONNECT,
-            ) != PackageManager.PERMISSION_GRANTED
-        ) return false
-        return runCatching {
-            context.getSystemService(BluetoothManager::class.java)
-                ?.getConnectedDevices(BluetoothProfile.A2DP)
-                ?.any { it.address == device.address } == true
-        }.getOrDefault(false)
-    }
+    private fun connectedAudioDevice(): BluetoothDevice? = runCatching {
+        val connected = context.getSystemService(BluetoothManager::class.java)
+            ?.getConnectedDevices(BluetoothProfile.A2DP)
+            .orEmpty()
+        val selectedAddress = Pods.selectedDevice(context)?.address
+        when {
+            selectedAddress != null -> connected.firstOrNull { it.address == selectedAddress }
+            connected.size == 1 -> connected.single()
+            else -> null
+        }
+    }.getOrNull()
 
     /**
      * The link can only be opened while the buds are actually connected — a bonded but idle
@@ -219,11 +231,15 @@ class PodsRepository(
                             BluetoothProfile.STATE_DISCONNECTED,
                         )
                         if (state != BluetoothProfile.STATE_CONNECTED) {
-                            session.onDisconnected()
+                            if (device.address == Pods.selectedDevice(context)?.address) {
+                                session.onDisconnected()
+                            }
                             return
                         }
-                        session.setDevice(device)
-                        session.onConnected()
+                        if (connectedAudioDevice()?.address == device.address) {
+                            session.setDevice(device)
+                            session.onConnected()
+                        }
                     }
                 }
             }
