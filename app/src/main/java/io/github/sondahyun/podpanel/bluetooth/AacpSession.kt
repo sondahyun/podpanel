@@ -80,9 +80,11 @@ class AacpSession(
         // A verdict already reached on this OS build is not worth re-proving on every
         // connect; it would mean a failed handshake every time the buds come back.
         cache.verdict(address)?.let { reason ->
+            Log.d(TAG, "skipping link: cached verdict=$reason")
             _state.value = SessionState.Unavailable(reason)
             return
         }
+        Log.d(TAG, "audio device connected; starting link")
         post(SessionEvent.DeviceConnected)
     }
 
@@ -129,6 +131,7 @@ class AacpSession(
                 else -> Unit
             }
             val transition = SessionGraph.reduce(_state.value, event)
+            Log.d(TAG, "${_state.value} + ${event::class.simpleName} -> ${transition.state}")
             _state.value = transition.state
             transition.effects.forEach { apply(it) }
         }
@@ -155,7 +158,9 @@ class AacpSession(
             post(SessionEvent.SocketFailed(null))
             return
         }
-        if (!L2capSockets.available()) {
+        val socketApiAvailable = L2capSockets.available()
+        Log.d(TAG, "opening L2CAP socket: apiAvailable=$socketApiAvailable")
+        if (!socketApiAvailable) {
             post(SessionEvent.SocketFailed(Unreachable.NoSocketApi))
             return
         }
@@ -165,6 +170,7 @@ class AacpSession(
             val opened = runCatching {
                 L2capSockets.open(target, Aacp.PSM).also { opened ->
                     pendingSocket = opened
+                    Log.d(TAG, "socket created; connecting")
                     opened.connect()
                 }
             }
@@ -176,6 +182,7 @@ class AacpSession(
                     }
                     if (pendingSocket === s) pendingSocket = null
                     socket = s
+                    Log.d(TAG, "socket connected")
                     startReader(s, generation)
                     post(SessionEvent.SocketOpened(generation))
                 },
@@ -270,6 +277,8 @@ class AacpSession(
     private fun Throwable.toReason(): Unreachable? = when {
         this is SecurityException -> Unreachable.PermissionDenied
         this is ReflectiveOperationException -> Unreachable.NoSocketApi
+        this is IOException && message?.contains("socket might closed or timeout") == true ->
+            Unreachable.ChannelRejected
         else -> null
     }
 

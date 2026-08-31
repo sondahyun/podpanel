@@ -2,20 +2,24 @@ package io.github.sondahyun.podpanel.bluetooth
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.bluetooth.BluetoothA2dp
+import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothProfile
 import android.bluetooth.BluetoothSocket
 import android.content.Context
 import android.content.pm.PackageManager
-import android.os.Build
 import androidx.core.content.ContextCompat
 import io.github.sondahyun.podpanel.protocol.aacp.Aacp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.withTimeoutOrNull
 import java.io.IOException
+import kotlin.coroutines.resume
 
 object ChannelBProbe {
 
@@ -25,6 +29,7 @@ object ChannelBProbe {
     )
 
     private const val HANDSHAKE_TIMEOUT_MS = 2_000L
+    private const val PROFILE_TIMEOUT_MS = 2_000L
 
     data class Step(val name: String, val outcome: Outcome, val detail: String)
 
@@ -32,15 +37,12 @@ object ChannelBProbe {
 
     data class Report(
         val device: String,
-        val androidRelease: String,
-        val sdkInt: Int,
-        val oneUi: String?,
         val steps: List<Step>,
     ) {
         val channelBOpen: Boolean get() = steps.all { it.outcome == Outcome.Pass }
 
         fun asText(): String = buildString {
-            appendLine("$device · Android $androidRelease (API $sdkInt)${oneUi?.let { " · One UI $it" } ?: ""}")
+            appendLine(device)
             appendLine()
             steps.forEach { step ->
                 val mark = when (step.outcome) {
@@ -66,7 +68,7 @@ object ChannelBProbe {
             "블루투스 연결 권한",
             "연결된 오디오 기기",
             "기기가 지금 연결돼 있는가",
-            "히든 소켓 생성자 도달",
+            "L2CAP 소켓 생성",
             "L2CAP 0x1001 연결",
             "핸드셰이크 응답",
         )
@@ -78,39 +80,29 @@ object ChannelBProbe {
             if (granted) "BLUETOOTH_CONNECT 허용됨" else "권한이 없어 더 진행할 수 없습니다")
         if (!granted) {
             skipRest(1, order)
-            return@withContext report(context, steps)
+            return@withContext report(steps)
         }
 
         // 2 — use the audio device Android reports as connected.
-        val pods = context.getSystemService(BluetoothManager::class.java)
-            ?.getConnectedDevices(BluetoothProfile.A2DP)
-            ?.firstOrNull()
+        val pods = withTimeoutOrNull(PROFILE_TIMEOUT_MS) { connectedA2dpDevice(context) }
         steps += Step(order[1], if (pods != null) Outcome.Pass else Outcome.Fail,
             pods?.let { "${it.name} · ${it.address}" } ?: "연결된 오디오 기기를 찾지 못했습니다")
         if (pods == null) {
             skipRest(2, order)
-            return@withContext report(context, steps)
+            return@withContext report(steps)
         }
 
-        // 3 — the selected device is already connected.
-        val connected = context.getSystemService(BluetoothManager::class.java)
-            ?.getConnectedDevices(BluetoothProfile.A2DP)
-            ?.any { it.address == pods.address } == true
-        steps += Step(order[2], if (connected) Outcome.Pass else Outcome.Fail,
-            if (connected) "오디오 연결됨" else "오디오 기기를 연결한 뒤 다시 시도하세요")
-        if (!connected) {
-            skipRest(3, order)
-            return@withContext report(context, steps)
-        }
+        // 3 — the device was returned by the active A2DP profile.
+        steps += Step(order[2], Outcome.Pass, "오디오 연결됨")
 
-        // 4 — verify that the app can create the required socket.
+        // 4 — verify that the app can create an L2CAP socket.
         val reachable = L2capSockets.available()
         steps += Step(order[3], if (reachable) Outcome.Pass else Outcome.Fail,
-            if (reachable) "숨은 BluetoothSocket 생성자에 도달"
-            else "필요한 BluetoothSocket 생성자에 접근할 수 없습니다")
+            if (reachable) "L2CAP 소켓 생성 가능"
+            else "L2CAP 소켓을 만들 수 없습니다")
         if (!reachable) {
             skipRest(4, order)
-            return@withContext report(context, steps)
+            return@withContext report(steps)
         }
 
         // 5 — open the socket
@@ -127,7 +119,7 @@ object ChannelBProbe {
         val open = socket.getOrNull()
         if (open == null) {
             skipRest(5, order)
-            return@withContext report(context, steps)
+            return@withContext report(steps)
         }
 
         // 6 — wait for a handshake reply.
@@ -152,22 +144,39 @@ object ChannelBProbe {
             },
         )
         runCatching { open.close() }
-        report(context, steps)
+        report(steps)
     }
 
-    private fun report(context: Context, steps: List<Step>) = Report(
-        device = "${Build.MANUFACTURER} ${Build.MODEL}",
-        androidRelease = Build.VERSION.RELEASE,
-        sdkInt = Build.VERSION.SDK_INT,
-        oneUi = oneUiVersion(),
+    private fun report(steps: List<Step>) = Report(
+        device = "연결 진단",
         steps = steps,
     )
 
-    /** Samsung exposes One UI's version through a system property, not the SDK. */
-    private fun oneUiVersion(): String? = runCatching {
-        val field = Build.VERSION::class.java.getDeclaredField("SEM_PLATFORM_INT")
-        val value = field.getInt(null)
-        if (value < 100000) null else "${(value - 90000) / 10000f}"
-    }.getOrNull()
+    @SuppressLint("MissingPermission")
+    private suspend fun connectedA2dpDevice(context: Context): BluetoothDevice? =
+        suspendCancellableCoroutine { continuation ->
+            val adapter = context.getSystemService(BluetoothManager::class.java)?.adapter
+            if (adapter == null) {
+                continuation.resume(null)
+                return@suspendCancellableCoroutine
+            }
+            val listener = object : BluetoothProfile.ServiceListener {
+                override fun onServiceConnected(profile: Int, proxy: BluetoothProfile) {
+                    if (profile != BluetoothProfile.A2DP) return
+                    val device = (proxy as? BluetoothA2dp)?.connectedDevices?.firstOrNull()
+                    adapter.closeProfileProxy(BluetoothProfile.A2DP, proxy)
+                    if (continuation.isActive) continuation.resume(device)
+                }
+
+                override fun onServiceDisconnected(profile: Int) {
+                    if (profile == BluetoothProfile.A2DP && continuation.isActive) {
+                        continuation.resume(null)
+                    }
+                }
+            }
+            if (!adapter.getProfileProxy(context, listener, BluetoothProfile.A2DP)) {
+                continuation.resume(null)
+            }
+        }
 
 }

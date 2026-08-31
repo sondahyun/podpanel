@@ -48,6 +48,7 @@ fun controlAvailability(session: SessionState): ControlAvailability = when (sess
         Unreachable.PermissionDenied -> ControlAvailability.NeedsPermission
         Unreachable.NoSocketApi -> ControlAvailability.Unsupported
         Unreachable.HandshakeSilent -> ControlAvailability.Unsupported
+        Unreachable.ChannelRejected -> ControlAvailability.Unsupported
     }
     else -> ControlAvailability.Connecting
 }

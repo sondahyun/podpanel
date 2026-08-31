@@ -80,7 +80,7 @@ fun ProbeScreen(onBack: () -> Unit) {
             item { Box(Modifier.padding(top = 22.dp)) }
             item {
                 InsetGroup(
-                    header = "${result.device} · Android ${result.androidRelease}",
+                    header = result.device,
                     footer = stringResource(
                         if (result.channelBOpen) R.string.probe_verdict_open
                         else R.string.probe_verdict_blocked,

@@ -7,7 +7,8 @@ import io.github.sondahyun.podpanel.protocol.aacp.Unreachable
 /**
  * Remembers a settled verdict so the app stops trying.
  *
- * The OS build is part of the key, so a system update gets a fresh connection verdict.
+ * The cache version and OS build are part of the key, so a changed connection strategy or
+ * a system update gets a fresh connection verdict.
  *
  * Recoverable reasons are deliberately not cached — the user can fix those, and remembering
  * them would hide the fix.
@@ -28,5 +29,9 @@ class CapabilityCache(context: Context) {
 
     fun forget(address: String) = prefs.edit().remove(key(address)).apply()
 
-    private fun key(address: String) = "$address@${Build.FINGERPRINT}"
+    private fun key(address: String) = "$CACHE_VERSION:$address@${Build.FINGERPRINT}"
+
+    private companion object {
+        const val CACHE_VERSION = 2
+    }
 }

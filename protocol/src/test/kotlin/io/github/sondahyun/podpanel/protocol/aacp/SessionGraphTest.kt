@@ -106,6 +106,17 @@ class SessionGraphTest {
     }
 
     @Test
+    fun `a rejected channel settles permanently`() {
+        val (state, effects) = run(
+            SessionEvent.DeviceConnected,
+            SessionEvent.SocketFailed(Unreachable.ChannelRejected),
+        )
+
+        assertEquals(SessionState.Unavailable(Unreachable.ChannelRejected), state)
+        assertTrue(effects.contains(SessionEffect.Remember(Unreachable.ChannelRejected)))
+    }
+
+    @Test
     fun `a recoverable failure settles without being remembered`() {
         val (state, effects) = run(
             SessionEvent.DeviceConnected,

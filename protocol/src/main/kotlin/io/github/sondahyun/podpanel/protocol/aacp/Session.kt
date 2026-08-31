@@ -22,11 +22,14 @@ sealed interface SessionState {
 
 /** Why the link will not open. Recoverable ones are worth offering a retry for. */
 enum class Unreachable(val recoverable: Boolean) {
-    /** The hidden socket constructor is out of reach. No OS update changes this. */
+    /** The socket constructor is out of reach. */
     NoSocketApi(false),
 
-    /** Connected, wrote the handshake, heard nothing. The stack's FCS problem. */
+    /** Connected, wrote the handshake, heard nothing. */
     HandshakeSilent(false),
+
+    /** The peer rejected the channel while it was opening. */
+    ChannelRejected(false),
 
     /** The user can fix this one. */
     PermissionDenied(true),

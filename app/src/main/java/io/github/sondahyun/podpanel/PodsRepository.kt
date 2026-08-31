@@ -10,6 +10,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.util.Log
 import io.github.sondahyun.podpanel.bluetooth.AacpSession
 import io.github.sondahyun.podpanel.protocol.PodsState
 import io.github.sondahyun.podpanel.protocol.applyAacp
@@ -62,8 +63,26 @@ class PodsRepository(
 
     private var primaryIsLeft: Boolean? = null
     private var connectionReceiver: BroadcastReceiver? = null
+    private var a2dp: BluetoothA2dp? = null
     private val lidOpenDetector = LidOpenDetector()
     private var lidEventsEnabled = false
+
+    private val a2dpListener = object : BluetoothProfile.ServiceListener {
+        @SuppressLint("MissingPermission")
+        override fun onServiceConnected(profile: Int, proxy: BluetoothProfile) {
+            if (profile != BluetoothProfile.A2DP) return
+            a2dp = proxy as? BluetoothA2dp
+            Log.d(TAG, "A2DP proxy connected; devices=${a2dp?.connectedDevices?.size ?: 0}")
+            syncAudioDevice()
+        }
+
+        override fun onServiceDisconnected(profile: Int) {
+            if (profile != BluetoothProfile.A2DP) return
+            a2dp = null
+            Log.d(TAG, "A2DP proxy disconnected")
+            connectA2dpProfile()
+        }
+    }
 
     init {
         // Collecting once, for the repository's life, rather than on every start: this is a
@@ -94,15 +113,16 @@ class PodsRepository(
      */
     fun start() {
         registerConnectionWatcher()
-        val connected = connectedAudioDevice()
-        session.setDevice(connected)
-        if (connected != null) session.onConnected()
+        connectA2dpProfile()
+        syncAudioDevice()
         scanner.start()
     }
 
     fun stop() {
         connectionReceiver?.let { runCatching { context.unregisterReceiver(it) } }
         connectionReceiver = null
+        a2dp?.let { proxy -> adapter()?.closeProfileProxy(BluetoothProfile.A2DP, proxy) }
+        a2dp = null
         scanner.stop()
     }
 
@@ -183,10 +203,23 @@ class PodsRepository(
         context.getSystemService(BluetoothManager::class.java)?.adapter
 
     @SuppressLint("MissingPermission")
+    private fun connectA2dpProfile() {
+        if (a2dp != null) return
+        val requested = adapter()?.getProfileProxy(context, a2dpListener, BluetoothProfile.A2DP) == true
+        Log.d(TAG, "requesting A2DP proxy: $requested")
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun syncAudioDevice() {
+        val connected = connectedAudioDevice()
+        Log.d(TAG, "sync: selected=${selectedAudioDevice()?.name}, connected=${connected?.name}")
+        session.setDevice(connected)
+        if (connected != null) session.onConnected() else session.onDisconnected()
+    }
+
+    @SuppressLint("MissingPermission")
     private fun connectedAudioDevice(): BluetoothDevice? = runCatching {
-        val connected = context.getSystemService(BluetoothManager::class.java)
-            ?.getConnectedDevices(BluetoothProfile.A2DP)
-            .orEmpty()
+        val connected = a2dp?.connectedDevices.orEmpty()
         val selectedAddress = Pods.selectedDevice(context)?.address
         when {
             selectedAddress != null -> connected.firstOrNull { it.address == selectedAddress }
@@ -212,9 +245,8 @@ class PodsRepository(
                             session.onBluetoothOff()
                         }
                         BluetoothAdapter.STATE_ON -> {
-                            val connected = connectedAudioDevice()
-                            session.setDevice(connected)
-                            if (connected != null) session.onConnected()
+                            connectA2dpProfile()
+                            syncAudioDevice()
                             scanner.start()
                         }
                     }
@@ -230,15 +262,14 @@ class PodsRepository(
                             BluetoothProfile.EXTRA_STATE,
                             BluetoothProfile.STATE_DISCONNECTED,
                         )
-                        if (state != BluetoothProfile.STATE_CONNECTED) {
-                            if (device.address == Pods.selectedDevice(context)?.address) {
-                                session.onDisconnected()
-                            }
-                            return
-                        }
-                        if (connectedAudioDevice()?.address == device.address) {
-                            session.setDevice(device)
-                            session.onConnected()
+                        Log.d(TAG, "A2DP broadcast for ${device.name}: state=$state")
+                        if (state == BluetoothProfile.STATE_CONNECTED) {
+                            connectA2dpProfile()
+                            if (a2dp != null) syncAudioDevice()
+                        } else if (Pods.selectedDevice(context)?.address == null ||
+                            device.address == Pods.selectedDevice(context)?.address
+                        ) {
+                            session.onDisconnected()
                         }
                     }
                 }
@@ -252,6 +283,10 @@ class PodsRepository(
             },
         )
         connectionReceiver = receiver
+    }
+
+    private companion object {
+        const val TAG = "PodsRepository"
     }
 
 }
