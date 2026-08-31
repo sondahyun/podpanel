@@ -182,8 +182,9 @@ class PodsService : Service() {
         }
 
         private fun widgetsPlaced(context: Context): Boolean =
-            AppWidgetManager.getInstance(context)
-                .getAppWidgetIds(ComponentName(context, BatteryWidgetReceiver::class.java))
-                .isNotEmpty()
+            AppWidgetManager.getInstance(context).let { manager ->
+                manager.getAppWidgetIds(ComponentName(context, BatteryWidgetReceiver::class.java)).isNotEmpty() ||
+                    manager.getAppWidgetIds(ComponentName(context, io.github.sondahyun.podpanel.widget.NoiseControlWidgetReceiver::class.java)).isNotEmpty()
+            }
     }
 }

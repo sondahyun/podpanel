@@ -47,14 +47,20 @@ object WidgetUpdater {
     )
 
     suspend fun push(context: Context, pods: PodsState?, now: Long = System.currentTimeMillis()) {
-        if (GlanceAppWidgetManager(context).getGlanceIds(BatteryWidget::class.java).isEmpty()) return
+        val manager = GlanceAppWidgetManager(context)
+        val hasBatteryWidget = manager.getGlanceIds(BatteryWidget::class.java).isNotEmpty()
+        val hasNoiseWidget = manager.getGlanceIds(NoiseControlWidget::class.java).isNotEmpty()
+        if (!hasBatteryWidget && !hasNoiseWidget) return
 
         val next = snapshot(pods)
         if (!shouldPush(lastSnapshot, next, lastPushedAt, now)) return
 
         lastSnapshot = next
         lastPushedAt = now
-        runCatching { BatteryWidget().updateAll(context) }
+        runCatching {
+            if (hasBatteryWidget) BatteryWidget().updateAll(context)
+            if (hasNoiseWidget) NoiseControlWidget().updateAll(context)
+        }
             .onFailure { Log.w(TAG, "widget update failed", it) }
     }
 
@@ -84,5 +90,13 @@ object WidgetUpdater {
     fun invalidate() {
         lastSnapshot = null
         lastPushedAt = 0L
+    }
+
+    suspend fun refresh(context: Context) {
+        val manager = GlanceAppWidgetManager(context)
+        runCatching {
+            if (manager.getGlanceIds(BatteryWidget::class.java).isNotEmpty()) BatteryWidget().updateAll(context)
+            if (manager.getGlanceIds(NoiseControlWidget::class.java).isNotEmpty()) NoiseControlWidget().updateAll(context)
+        }.onFailure { Log.w(TAG, "widget refresh failed", it) }
     }
 }

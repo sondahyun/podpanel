@@ -88,6 +88,7 @@
     <string name="licenses_trademark">“AirPods” and “Apple” are trademarks of Apple Inc. This app is not affiliated with Apple and names them only to say what it works with.</string>
 
     <string name="widget_description">Shows left, right and case battery on your home screen</string>
+    <string name="noise_widget_description">Changes listening modes from your home screen</string>
     <string name="widget_preview_values">82 · 79 · 41</string>
     <string name="lid_popup_label">Case-open popup</string>
     <string name="lid_popup_hint">Show a battery card when a lid-open signal is detected</string>

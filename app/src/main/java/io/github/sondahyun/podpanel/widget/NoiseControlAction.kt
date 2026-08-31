@@ -28,6 +28,7 @@ class NoiseControlAction : ActionCallback {
         PodsService.start(context)
         Pods.repository(context).setListeningMode(mode)
         WidgetUpdater.invalidate()
+        WidgetUpdater.refresh(context)
     }
 
     companion object {
