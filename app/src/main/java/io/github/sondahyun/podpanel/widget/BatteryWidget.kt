@@ -47,7 +47,6 @@ import io.github.sondahyun.podpanel.R
 import io.github.sondahyun.podpanel.design.DarkPodColors
 import io.github.sondahyun.podpanel.design.LightPodColors
 import io.github.sondahyun.podpanel.design.PodColors
-import io.github.sondahyun.podpanel.design.graphics.GlyphBitmap
 import io.github.sondahyun.podpanel.design.graphics.PodGlyph
 import io.github.sondahyun.podpanel.design.graphics.RingBitmap
 import io.github.sondahyun.podpanel.protocol.PodBattery
@@ -122,14 +121,9 @@ class BatteryWidget(
             verticalAlignment = Alignment.Vertical.CenterVertically,
         ) {
             Image(
-                provider = ImageProvider(
-                    GlyphBitmap.pair(
-                        sizePx = (layout.glyph.value * RENDER_SCALE).toInt(),
-                        color = colors.label.toArgb(),
-                    ),
-                ),
+                provider = ImageProvider(R.drawable.pods_product_hero),
                 contentDescription = null,
-                modifier = GlanceModifier.size(layout.glyph),
+                modifier = GlanceModifier.width(layout.glyph * 1.8f).height(layout.glyph),
             )
             Spacer(GlanceModifier.width(7.dp))
             Text(

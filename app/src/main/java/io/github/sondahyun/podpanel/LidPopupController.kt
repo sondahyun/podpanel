@@ -12,6 +12,7 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.ImageView
 import io.github.sondahyun.podpanel.protocol.PodsStatus
 
 /** A short-lived app overlay shown after a new lid-open advertisement. */
@@ -68,6 +69,13 @@ class LidPopupController(private val context: Context) {
             close()
         }
 
+        addView(ImageView(context).apply {
+            setImageResource(R.drawable.pods_product_hero)
+            scaleType = ImageView.ScaleType.CENTER_INSIDE
+        }, LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            76.dp,
+        ))
         addView(label(status.modelName, 20f, Color.BLACK))
         addView(label(context.getString(R.string.lid_popup_opened), 14f, 0xFF6B6B6B.toInt()).apply {
             setPadding(0, 4.dp, 0, 16.dp)
