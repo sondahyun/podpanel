@@ -7,9 +7,7 @@ import io.github.sondahyun.podpanel.protocol.aacp.Unreachable
 /**
  * Remembers a settled verdict so the app stops trying.
  *
- * Keyed on the OS build as well as the device: the whole point of the Android 17 fix is that
- * the same phone with the same AirPods changes its answer after an update, and a cache that
- * outlived the update would keep telling the user it cannot be done.
+ * The OS build is part of the key, so a system update gets a fresh connection verdict.
  *
  * Recoverable reasons are deliberately not cached — the user can fix those, and remembering
  * them would hide the fix.

@@ -30,7 +30,6 @@
     <string name="noise_cancellation">노이즈 캔슬링</string>
     <string name="noise_transparency">주변음</string>
     <string name="noise_adaptive">적응형</string>
-    <string name="noise_needs_update">이 기기에서 양방향 연결을 열지 못했습니다.</string>
     <string name="noise_unsupported">이 기기에서 양방향 연결을 사용할 수 없습니다.</string>
 
     <string name="wear_both">둘 다 착용 중</string>

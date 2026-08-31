@@ -1,6 +1,5 @@
 package io.github.sondahyun.podpanel.ui
 
-import android.os.Build
 import io.github.sondahyun.podpanel.PodsScanner
 import io.github.sondahyun.podpanel.PodsStore
 import io.github.sondahyun.podpanel.protocol.PodsState
@@ -34,9 +33,6 @@ sealed interface ControlAvailability {
     /** The link is being opened. Transient — worth showing rather than pretending. */
     data object Connecting : ControlAvailability
 
-    /** The link would open on a newer Android. Saying so is worth more than "unsupported". */
-    data object NeedsOsUpdate : ControlAvailability
-
     /** Nothing to wait for on this device. */
     data object Unsupported : ControlAvailability
 
@@ -46,19 +42,12 @@ sealed interface ControlAvailability {
     data object Available : ControlAvailability
 }
 
-const val ANDROID_17 = 37
-
-fun controlAvailability(
-    session: SessionState,
-    sdkInt: Int = Build.VERSION.SDK_INT,
-): ControlAvailability = when (session) {
+fun controlAvailability(session: SessionState): ControlAvailability = when (session) {
     SessionState.Streaming -> ControlAvailability.Available
     is SessionState.Unavailable -> when (session.reason) {
         Unreachable.PermissionDenied -> ControlAvailability.NeedsPermission
         Unreachable.NoSocketApi -> ControlAvailability.Unsupported
-        Unreachable.HandshakeSilent ->
-            if (sdkInt < ANDROID_17) ControlAvailability.NeedsOsUpdate
-            else ControlAvailability.Unsupported
+        Unreachable.HandshakeSilent -> ControlAvailability.Unsupported
     }
     else -> ControlAvailability.Connecting
 }

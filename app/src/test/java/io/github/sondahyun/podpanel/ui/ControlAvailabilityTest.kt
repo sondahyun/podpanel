@@ -8,20 +8,15 @@ import kotlin.test.assertEquals
 /**
  * Which message the noise-control section shows when it cannot work.
  *
- * Worth testing because every wrong answer here is a lie the user will act on — telling
- * someone to update an OS that will not help, or telling someone to give up on a phone that
- * an update would fix.
+ * Worth testing because an unavailable link must not be presented as a usable control.
  */
 class ControlAvailabilityTest {
-
-    private val android16 = 36
-    private val android17 = ANDROID_17
 
     @Test
     fun `a streaming link is controllable`() {
         assertEquals(
             ControlAvailability.Available,
-            controlAvailability(SessionState.Streaming, android17),
+            controlAvailability(SessionState.Streaming),
         )
     }
 
@@ -37,43 +32,26 @@ class ControlAvailabilityTest {
         ).forEach { state ->
             assertEquals(
                 ControlAvailability.Connecting,
-                controlAvailability(state, android17),
+                controlAvailability(state),
                 "from $state",
             )
         }
     }
 
     @Test
-    fun `a silent handshake below Android 17 points at the update that would fix it`() {
-        assertEquals(
-            ControlAvailability.NeedsOsUpdate,
-            controlAvailability(
-                SessionState.Unavailable(Unreachable.HandshakeSilent),
-                android16,
-            ),
-        )
-    }
-
-    @Test
-    fun `the same silence on Android 17 has nothing left to wait for`() {
+    fun `a silent handshake is unavailable until a device test proves otherwise`() {
         assertEquals(
             ControlAvailability.Unsupported,
-            controlAvailability(
-                SessionState.Unavailable(Unreachable.HandshakeSilent),
-                android17,
-            ),
+            controlAvailability(SessionState.Unavailable(Unreachable.HandshakeSilent)),
         )
     }
 
     @Test
-    fun `a missing socket API never suggests updating, because no update changes it`() {
-        listOf(android16, android17, 40).forEach { sdk ->
-            assertEquals(
-                ControlAvailability.Unsupported,
-                controlAvailability(SessionState.Unavailable(Unreachable.NoSocketApi), sdk),
-                "on API $sdk",
-            )
-        }
+    fun `a missing socket API is unavailable`() {
+        assertEquals(
+            ControlAvailability.Unsupported,
+            controlAvailability(SessionState.Unavailable(Unreachable.NoSocketApi)),
+        )
     }
 
     @Test
@@ -82,7 +60,6 @@ class ControlAvailabilityTest {
             ControlAvailability.NeedsPermission,
             controlAvailability(
                 SessionState.Unavailable(Unreachable.PermissionDenied),
-                android16,
             ),
         )
     }

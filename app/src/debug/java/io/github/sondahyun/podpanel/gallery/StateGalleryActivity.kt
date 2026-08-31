@@ -105,9 +105,6 @@ private val CASES = listOf(
     Case("권한 없음", PodsUiState.NeedsPermission),
     Case("블루투스 꺼짐", PodsUiState.BluetoothOff),
     Case("LE 미지원", PodsUiState.NoBluetoothLe),
-    // The faces of the noise-control section. Two of the three phones this is being built
-    // for will sit on "업데이트 필요" until One UI 9 reaches them.
-    Case("업데이트 필요", advertised(stale = false), ControlAvailability.NeedsOsUpdate),
     Case("지원 불가", advertised(stale = false), ControlAvailability.Unsupported),
     Case("연결됨 · 제어 가능", linked(), ControlAvailability.Available),
 )

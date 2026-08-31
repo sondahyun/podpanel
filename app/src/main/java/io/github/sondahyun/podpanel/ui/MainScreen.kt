@@ -240,7 +240,6 @@ private fun NoiseControlSection(
         header = stringResource(R.string.section_noise_control),
         footer = when (controls) {
             ControlAvailability.Connecting -> stringResource(R.string.noise_connecting)
-            ControlAvailability.NeedsOsUpdate -> stringResource(R.string.noise_needs_update)
             ControlAvailability.Unsupported -> stringResource(R.string.noise_unsupported)
             ControlAvailability.NeedsPermission -> stringResource(R.string.noise_needs_permission)
             ControlAvailability.Available -> null

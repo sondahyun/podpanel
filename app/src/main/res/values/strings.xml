@@ -34,7 +34,6 @@
     <string name="noise_cancellation">Noise Cancellation</string>
     <string name="noise_transparency">Transparency</string>
     <string name="noise_adaptive">Adaptive</string>
-    <string name="noise_needs_update">A two-way link could not be opened on this device.</string>
     <string name="noise_unsupported">A two-way link is unavailable on this device.</string>
 
     <string name="wear_both">Both in</string>
