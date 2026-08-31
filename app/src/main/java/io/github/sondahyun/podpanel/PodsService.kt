@@ -1,6 +1,7 @@
 package io.github.sondahyun.podpanel
 
 import io.github.sondahyun.podpanel.protocol.PodsState
+import io.github.sondahyun.podpanel.protocol.WearPlaybackGate
 import io.github.sondahyun.podpanel.widget.BatteryWidgetReceiver
 import io.github.sondahyun.podpanel.widget.WidgetUpdater
 import kotlinx.coroutines.CoroutineScope
@@ -35,6 +36,7 @@ class PodsService : Service() {
     private var lidCollector: Job? = null
     private var holding = false
     private lateinit var lidPopup: LidPopupController
+    private val wearPlaybackGate = WearPlaybackGate()
 
     override fun onCreate() {
         super.onCreate()
@@ -57,6 +59,7 @@ class PodsService : Service() {
                 repository.state.collectLatest { pods ->
                     notifyManager().notify(NOTIFICATION_ID, buildNotification(pods))
                     WidgetUpdater.push(this@PodsService, pods)
+                    applyWearPlayback(pods)
                 }
             }
             lidCollector = scope.launch {
@@ -71,6 +74,7 @@ class PodsService : Service() {
         lidCollector?.cancel()
         lidCollector = null
         lidPopup.close()
+        wearPlaybackGate.reset()
         Pods.repository(this).setLidEventsEnabled(false)
         scope.cancel()
         if (holding) {
@@ -127,6 +131,18 @@ class PodsService : Service() {
 
     private fun notifyManager() = getSystemService(NotificationManager::class.java)
 
+    private fun applyWearPlayback(pods: PodsState) {
+        if (!Pods.mediaAutoPauseEnabled(this)) {
+            wearPlaybackGate.reset()
+            return
+        }
+        when (wearPlaybackGate.observe(pods.wear.anyWorn)) {
+            WearPlaybackGate.Action.Pause -> wearPlaybackGate.pauseAttempted(MediaControlService.pause())
+            WearPlaybackGate.Action.Play -> MediaControlService.play()
+            WearPlaybackGate.Action.None -> Unit
+        }
+    }
+
     companion object {
         private const val CHANNEL_ID = "pods_battery"
         private const val NOTIFICATION_ID = 1
@@ -160,6 +176,7 @@ class PodsService : Service() {
         fun syncTo(context: Context) {
             val wanted = Pods.notificationEnabled(context) ||
                 Pods.lidPopupEnabled(context) ||
+                Pods.mediaAutoPauseEnabled(context) ||
                 widgetsPlaced(context)
             if (wanted) start(context) else stop(context)
         }

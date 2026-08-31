@@ -30,8 +30,8 @@
     <string name="noise_cancellation">노이즈 캔슬링</string>
     <string name="noise_transparency">주변음</string>
     <string name="noise_adaptive">적응형</string>
-    <string name="noise_needs_update">이 안드로이드 버전에서는 에어팟과 양방향 연결이 열리지 않습니다. Android 17(One UI 9)로 업데이트하면 열립니다.</string>
-    <string name="noise_unsupported">이 기기에서는 에어팟과 양방향 연결이 열리지 않습니다. 안드로이드 블루투스 스택의 제약이라 앱에서 해결할 수 없습니다.</string>
+    <string name="noise_needs_update">이 기기에서 양방향 연결을 열지 못했습니다.</string>
+    <string name="noise_unsupported">이 기기에서 양방향 연결을 사용할 수 없습니다.</string>
 
     <string name="wear_both">둘 다 착용 중</string>
     <string name="wear_left_only">왼쪽만 착용 중</string>
@@ -75,6 +75,9 @@
     <string name="lid_popup_label">케이스 열림 팝업</string>
     <string name="lid_popup_hint">케이스 열림 신호가 감지되면 배터리 카드를 표시합니다</string>
     <string name="lid_popup_opened">케이스가 열렸습니다</string>
+    <string name="media_auto_pause_label">착용에 따라 미디어 제어</string>
+    <string name="media_auto_pause_hint">마지막 이어폰을 빼면 일시정지하고 다시 착용하면 재생합니다</string>
+    <string name="media_control_service">PodPanel 미디어 제어</string>
     <string name="device_picker_title">에어팟 기기 선택</string>
     <string name="device_picker_header">연결에 사용할 본딩 기기를 선택하세요</string>
     <string name="device_picker_footer">여러 오디오 기기가 연결되어 있으면, 여기서 선택한 기기만 사용합니다.</string>

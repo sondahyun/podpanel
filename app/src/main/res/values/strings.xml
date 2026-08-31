@@ -34,8 +34,8 @@
     <string name="noise_cancellation">Noise Cancellation</string>
     <string name="noise_transparency">Transparency</string>
     <string name="noise_adaptive">Adaptive</string>
-    <string name="noise_needs_update">This Android version cannot open a two-way link to AirPods. Updating to Android 17 (One UI 9) opens it.</string>
-    <string name="noise_unsupported">A two-way link to AirPods cannot be opened on this device. That is a limit of the Android Bluetooth stack, not something the app can work around.</string>
+    <string name="noise_needs_update">A two-way link could not be opened on this device.</string>
+    <string name="noise_unsupported">A two-way link is unavailable on this device.</string>
 
     <string name="wear_both">Both in</string>
     <string name="wear_left_only">Left in</string>
@@ -93,6 +93,9 @@
     <string name="lid_popup_label">Case-open popup</string>
     <string name="lid_popup_hint">Show a battery card when a lid-open signal is detected</string>
     <string name="lid_popup_opened">Case opened</string>
+    <string name="media_auto_pause_label">Control media when worn</string>
+    <string name="media_auto_pause_hint">Pause after removing the last bud and resume after wearing one again</string>
+    <string name="media_control_service">PodPanel media control</string>
     <string name="device_picker_title">AirPods device</string>
     <string name="device_picker_header">Choose the paired device to connect to</string>
     <string name="device_picker_footer">When more than one audio device is connected, PodPanel only uses the device chosen here.</string>

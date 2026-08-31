@@ -20,6 +20,7 @@ object Pods {
     private const val PREFS = "podpanel"
     private const val KEY_NOTIFICATION = "notification_enabled"
     private const val KEY_LID_POPUP = "lid_popup_enabled"
+    private const val KEY_MEDIA_AUTO_PAUSE = "media_auto_pause_enabled"
     private const val KEY_DEVICE_ADDRESS = "selected_device_address"
     private const val KEY_DEVICE_NAME = "selected_device_name"
 
@@ -60,6 +61,13 @@ object Pods {
 
     fun setLidPopupEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_LID_POPUP, enabled).apply()
+    }
+
+    fun mediaAutoPauseEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_MEDIA_AUTO_PAUSE, false)
+
+    fun setMediaAutoPauseEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_MEDIA_AUTO_PAUSE, enabled).apply()
     }
 
     fun selectedDevice(context: Context): SelectedDevice? {

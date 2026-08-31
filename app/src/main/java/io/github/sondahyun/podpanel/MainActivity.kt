@@ -59,6 +59,7 @@ class MainActivity : ComponentActivity() {
                 var screen by remember { mutableStateOf(Screen.Main) }
                 var notification by remember { mutableStateOf(notificationPreference()) }
                 var lidPopup by remember { mutableStateOf(Pods.lidPopupEnabled(this@MainActivity)) }
+                var mediaAutoPause by remember { mutableStateOf(Pods.mediaAutoPauseEnabled(this@MainActivity)) }
                 var selectedDevice by remember { mutableStateOf(repository.selectedAudioDevice()) }
 
                 if (screen != Screen.Main) {
@@ -88,6 +89,7 @@ class MainActivity : ComponentActivity() {
                     controls = controlAvailability(session),
                     notificationEnabled = notification,
                     lidPopupEnabled = lidPopup,
+                    mediaAutoPauseEnabled = mediaAutoPause,
                     selectedDeviceName = selectedDevice?.name,
                     actions = PodsActions(
                         onListeningMode = repository::setListeningMode,
@@ -110,6 +112,14 @@ class MainActivity : ComponentActivity() {
                                     Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
                                     Uri.parse("package:$packageName"),
                                 ))
+                            }
+                            PodsService.syncTo(this)
+                        },
+                        onMediaAutoPauseChange = { enabled ->
+                            mediaAutoPause = enabled
+                            Pods.setMediaAutoPauseEnabled(this, enabled)
+                            if (enabled && !MediaControlService.isEnabled(this)) {
+                                startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
                             }
                             PodsService.syncTo(this)
                         },

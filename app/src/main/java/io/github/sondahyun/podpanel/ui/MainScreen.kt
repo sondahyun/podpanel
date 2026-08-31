@@ -58,6 +58,7 @@ data class PodsActions(
     val onGrantPermission: () -> Unit = {},
     val onNotificationChange: (Boolean) -> Unit = {},
     val onLidPopupChange: (Boolean) -> Unit = {},
+    val onMediaAutoPauseChange: (Boolean) -> Unit = {},
     val onOpenDevicePicker: () -> Unit = {},
     val onOpenLicenses: () -> Unit = {},
     val onOpenProbe: () -> Unit = {},
@@ -69,6 +70,7 @@ fun MainScreen(
     controls: ControlAvailability,
     notificationEnabled: Boolean,
     lidPopupEnabled: Boolean = false,
+    mediaAutoPauseEnabled: Boolean = false,
     selectedDeviceName: String? = null,
     actions: PodsActions,
 ) {
@@ -83,8 +85,10 @@ fun MainScreen(
             DisplaySection(
                 notificationEnabled,
                 lidPopupEnabled,
+                mediaAutoPauseEnabled,
                 actions.onNotificationChange,
                 actions.onLidPopupChange,
+                actions.onMediaAutoPauseChange,
                 selectedDeviceName,
                 actions.onOpenDevicePicker,
             )
@@ -314,8 +318,10 @@ private val TOGGLES: List<Triple<ControlId, Int, Int?>> = listOf(
 private fun DisplaySection(
     notificationEnabled: Boolean,
     lidPopupEnabled: Boolean,
+    mediaAutoPauseEnabled: Boolean,
     onNotificationChange: (Boolean) -> Unit,
     onLidPopupChange: (Boolean) -> Unit,
+    onMediaAutoPauseChange: (Boolean) -> Unit,
     selectedDeviceName: String?,
     onOpenDevicePicker: () -> Unit,
 ) {
@@ -341,6 +347,14 @@ private fun DisplaySection(
                 subtitle = stringResource(R.string.lid_popup_hint),
             ) {
                 PodSwitch(lidPopupEnabled, onLidPopupChange)
+            }
+        }
+        row {
+            PodRow(
+                title = stringResource(R.string.media_auto_pause_label),
+                subtitle = stringResource(R.string.media_auto_pause_hint),
+            ) {
+                PodSwitch(mediaAutoPauseEnabled, onMediaAutoPauseChange)
             }
         }
     }

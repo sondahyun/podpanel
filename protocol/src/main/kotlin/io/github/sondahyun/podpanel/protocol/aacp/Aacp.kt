@@ -8,10 +8,8 @@ package io.github.sondahyun.podpanel.protocol.aacp
  * single opcode ([Opcode.CONTROL]) and is told apart by a [ControlId], which is why adding a
  * new setting is usually a table entry rather than new parsing.
  *
- * The byte layouts here are facts read from public documentation, not code taken from
- * another implementation. Nothing in this file has been confirmed against hardware yet —
- * [AacpCodecTest] pins down what the code does, and captured traffic is what will settle
- * whether it is right.
+ * Nothing in this file has been confirmed against hardware yet. [AacpCodecTest] pins down
+ * what the code does; a captured exchange is needed to confirm the protocol on a device.
  */
 object Aacp {
 
