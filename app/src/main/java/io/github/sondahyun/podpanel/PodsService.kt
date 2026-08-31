@@ -32,11 +32,14 @@ class PodsService : Service() {
 
     private val scope = CoroutineScope(Dispatchers.Main.immediate + SupervisorJob())
     private var collector: Job? = null
+    private var lidCollector: Job? = null
     private var holding = false
+    private lateinit var lidPopup: LidPopupController
 
     override fun onCreate() {
         super.onCreate()
         createChannel()
+        lidPopup = LidPopupController(this)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -48,6 +51,7 @@ class PodsService : Service() {
         if (collector == null) {
             holding = true
             val repository = Pods.acquire(this)
+            repository.setLidEventsEnabled(Pods.lidPopupEnabled(this))
             startForeground(NOTIFICATION_ID, buildNotification(repository.state.value))
             collector = scope.launch {
                 repository.state.collectLatest { pods ->
@@ -55,12 +59,19 @@ class PodsService : Service() {
                     WidgetUpdater.push(this@PodsService, pods)
                 }
             }
+            lidCollector = scope.launch {
+                repository.lidOpened.collect { status -> lidPopup.show(status) }
+            }
         }
         return START_STICKY
     }
 
     override fun onDestroy() {
         collector = null
+        lidCollector?.cancel()
+        lidCollector = null
+        lidPopup.close()
+        Pods.repository(this).setLidEventsEnabled(false)
         scope.cancel()
         if (holding) {
             holding = false
@@ -147,7 +158,9 @@ class PodsService : Service() {
          * widget and leaving the switch off gave a widget frozen on whatever it first drew.
          */
         fun syncTo(context: Context) {
-            val wanted = Pods.notificationEnabled(context) || widgetsPlaced(context)
+            val wanted = Pods.notificationEnabled(context) ||
+                Pods.lidPopupEnabled(context) ||
+                widgetsPlaced(context)
             if (wanted) start(context) else stop(context)
         }
 

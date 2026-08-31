@@ -20,6 +20,7 @@ import io.github.sondahyun.podpanel.protocol.mergeAdvertisement
 import io.github.sondahyun.podpanel.protocol.withListeningMode
 import io.github.sondahyun.podpanel.protocol.withSetting
 import io.github.sondahyun.podpanel.protocol.PodsStatus
+import io.github.sondahyun.podpanel.protocol.LidOpenDetector
 import io.github.sondahyun.podpanel.protocol.aacp.Aacp
 import io.github.sondahyun.podpanel.protocol.aacp.AacpEvent
 import io.github.sondahyun.podpanel.protocol.aacp.ControlId
@@ -27,8 +28,11 @@ import io.github.sondahyun.podpanel.protocol.aacp.ListeningMode
 import io.github.sondahyun.podpanel.protocol.aacp.SessionState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 
 /**
@@ -53,10 +57,15 @@ class PodsRepository(
     private val _state = MutableStateFlow(PodsState())
     val state: StateFlow<PodsState> = _state.asStateFlow()
 
+    private val _lidOpened = MutableSharedFlow<PodsStatus>(extraBufferCapacity = 1)
+    val lidOpened: SharedFlow<PodsStatus> = _lidOpened.asSharedFlow()
+
     val sessionState: StateFlow<SessionState> get() = session.state
 
     private var primaryIsLeft: Boolean? = null
     private var connectionReceiver: BroadcastReceiver? = null
+    private val lidOpenDetector = LidOpenDetector()
+    private var lidEventsEnabled = false
 
     init {
         // Collecting once, for the repository's life, rather than on every start: this is a
@@ -72,7 +81,7 @@ class PodsRepository(
         scope.launch {
             // While the link is live the advertisement adds nothing and costs radio time.
             session.state.collect { state ->
-                if (state is SessionState.Streaming) scanner.stop() else scanner.start()
+                if (state is SessionState.Streaming && !lidEventsEnabled) scanner.stop() else scanner.start()
             }
         }
     }
@@ -110,6 +119,12 @@ class PodsRepository(
 
     fun retryLink() = session.retry()
 
+    /** Keeps BLE scanning alive while the lid popup is enabled. */
+    fun setLidEventsEnabled(enabled: Boolean) {
+        lidEventsEnabled = enabled
+        if (enabled) scanner.start() else if (session.state.value is SessionState.Streaming) scanner.stop()
+    }
+
     /**
      * Applies the change locally before the link confirms it.
      *
@@ -132,6 +147,7 @@ class PodsRepository(
     // can hold them still. What is left here is plumbing.
 
     private fun onAdvertisement(status: PodsStatus) {
+        if (lidEventsEnabled && lidOpenDetector.observe(status)) _lidOpened.tryEmit(status)
         primaryIsLeft = !status.flipped
         _state.value = _state.value.mergeAdvertisement(status)
     }

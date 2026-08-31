@@ -53,6 +53,7 @@ data class PodsActions(
     val onRetryLink: () -> Unit = {},
     val onGrantPermission: () -> Unit = {},
     val onNotificationChange: (Boolean) -> Unit = {},
+    val onLidPopupChange: (Boolean) -> Unit = {},
     val onOpenLicenses: () -> Unit = {},
     val onOpenProbe: () -> Unit = {},
 )
@@ -62,6 +63,7 @@ fun MainScreen(
     state: PodsUiState,
     controls: ControlAvailability,
     notificationEnabled: Boolean,
+    lidPopupEnabled: Boolean = false,
     actions: PodsActions,
 ) {
     LargeTitleScaffold(title = stringResource(R.string.title_my_pods)) {
@@ -71,7 +73,14 @@ fun MainScreen(
         item { Gap() }
         item { BehaviourSection(state.reading?.pods, controls, actions) }
         item { Gap() }
-        item { DisplaySection(notificationEnabled, actions.onNotificationChange) }
+        item {
+            DisplaySection(
+                notificationEnabled,
+                lidPopupEnabled,
+                actions.onNotificationChange,
+                actions.onLidPopupChange,
+            )
+        }
         item { Gap() }
         item { RawPacketSection() }
         item { Gap() }
@@ -297,14 +306,27 @@ private val TOGGLES: List<Triple<ControlId, Int, Int?>> = listOf(
 // ── 표시 ─────────────────────────────────────────────────────────────────────
 
 @Composable
-private fun DisplaySection(enabled: Boolean, onChange: (Boolean) -> Unit) {
+private fun DisplaySection(
+    notificationEnabled: Boolean,
+    lidPopupEnabled: Boolean,
+    onNotificationChange: (Boolean) -> Unit,
+    onLidPopupChange: (Boolean) -> Unit,
+) {
     InsetGroup(header = stringResource(R.string.section_display)) {
         row {
             PodRow(
                 title = stringResource(R.string.notification_label),
                 subtitle = stringResource(R.string.notification_hint),
             ) {
-                PodSwitch(enabled, onChange)
+                PodSwitch(notificationEnabled, onNotificationChange)
+            }
+        }
+        row {
+            PodRow(
+                title = stringResource(R.string.lid_popup_label),
+                subtitle = stringResource(R.string.lid_popup_hint),
+            ) {
+                PodSwitch(lidPopupEnabled, onLidPopupChange)
             }
         }
     }

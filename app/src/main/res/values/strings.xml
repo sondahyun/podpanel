@@ -90,6 +90,9 @@
 
     <string name="widget_description">Shows left, right and case battery on your home screen</string>
     <string name="widget_preview_values">82 · 79 · 41</string>
+    <string name="lid_popup_label">Case-open popup</string>
+    <string name="lid_popup_hint">Show a battery card when a lid-open signal is detected</string>
+    <string name="lid_popup_opened">Case opened</string>
 
     <string name="channel_name">Battery</string>
     <string name="channel_description">Keeps AirPods battery in the notification shade</string>

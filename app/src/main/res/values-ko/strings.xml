@@ -72,6 +72,9 @@
 
     <string name="widget_description">에어팟 좌·우·케이스 배터리를 홈 화면에 표시합니다</string>
     <string name="widget_preview_values">82 · 79 · 41</string>
+    <string name="lid_popup_label">케이스 열림 팝업</string>
+    <string name="lid_popup_hint">케이스 열림 신호가 감지되면 배터리 카드를 표시합니다</string>
+    <string name="lid_popup_opened">케이스가 열렸습니다</string>
 
     <string name="section_about">정보</string>
     <string name="licenses">오픈소스 라이선스</string>

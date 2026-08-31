@@ -19,6 +19,7 @@ object Pods {
 
     private const val PREFS = "podpanel"
     private const val KEY_NOTIFICATION = "notification_enabled"
+    private const val KEY_LID_POPUP = "lid_popup_enabled"
 
     @Volatile
     private var instance: PodsRepository? = null
@@ -48,6 +49,13 @@ object Pods {
 
     fun setNotificationEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_NOTIFICATION, enabled).apply()
+    }
+
+    fun lidPopupEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_LID_POPUP, false)
+
+    fun setLidPopupEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_LID_POPUP, enabled).apply()
     }
 
     private fun prefs(context: Context) =

@@ -1,8 +1,11 @@
 package io.github.sondahyun.podpanel
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.net.Uri
+import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
@@ -54,6 +57,7 @@ class MainActivity : ComponentActivity() {
             PodTheme {
                 var screen by remember { mutableStateOf(Screen.Main) }
                 var notification by remember { mutableStateOf(notificationPreference()) }
+                var lidPopup by remember { mutableStateOf(Pods.lidPopupEnabled(this@MainActivity)) }
 
                 if (screen != Screen.Main) {
                     BackHandler { screen = Screen.Main }
@@ -71,6 +75,7 @@ class MainActivity : ComponentActivity() {
                     state = rememberPodsUiState(),
                     controls = controlAvailability(session),
                     notificationEnabled = notification,
+                    lidPopupEnabled = lidPopup,
                     actions = PodsActions(
                         onListeningMode = repository::setListeningMode,
                         onToggle = repository::setToggle,
@@ -81,6 +86,18 @@ class MainActivity : ComponentActivity() {
                             setNotificationPreference(enabled)
                             // Not a direct start/stop: a placed widget also needs the
                             // service, and switching this off must not take it down.
+                            PodsService.syncTo(this)
+                        },
+                        onLidPopupChange = { enabled ->
+                            lidPopup = enabled
+                            Pods.setLidPopupEnabled(this, enabled)
+                            repository.setLidEventsEnabled(enabled)
+                            if (enabled && !Settings.canDrawOverlays(this)) {
+                                startActivity(Intent(
+                                    Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                                    Uri.parse("package:$packageName"),
+                                ))
+                            }
                             PodsService.syncTo(this)
                         },
                         onOpenLicenses = { screen = Screen.Licences },
@@ -128,7 +145,8 @@ class MainActivity : ComponentActivity() {
     private fun hold() {
         if (holding) return
         holding = true
-        Pods.acquire(this)
+        Pods.acquire(this).setLidEventsEnabled(Pods.lidPopupEnabled(this))
+        PodsService.syncTo(this)
     }
 
     private fun ensurePermissions() {
